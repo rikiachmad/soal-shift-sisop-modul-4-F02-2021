@@ -14,7 +14,7 @@
 char dirpath[maxSize];
 
 //melakukan encode/decode
-char *endecode(char src[])
+char *AtoZ_code(char src[])
 {
     char str[maxSize];
     strcpy(str, src);
@@ -32,6 +32,31 @@ char *endecode(char src[])
     }
     char *res = str;
     return res;
+}
+char *RX_code(char src[])
+{
+    char str[maxSize];
+    strcpy(str, src);
+    int i;
+    for (i = 0; i < strlen(str); i++)
+    {
+        if (str[i] >= 'A' && str[i] <= 'Z')
+        {
+            if (str[i] < 'N')
+                str[i] += 13;
+            else
+                str[i] -= 13;
+        }
+        else if (str[i] >= 'a' && str[i] <= 'z')
+        {
+            if (str[i] < 'n')
+                str[i] += 13;
+            else
+                str[i] -= 13;
+        }
+    }
+    char *res = str;
+    return AtoZ_code(res);
 }
 
 // Membuat log sesuai format, 1 jika rename dan 2 jika mkdir
@@ -58,10 +83,10 @@ char *find_path(const char *path)
 {
     char fpath[2 * maxSize];
 
-    bool flag, toMirror = 0;
+    bool flag, toMirror = 0, toROT = 0;
 
     // Cek apakah perlu encode/decode (AtoZ_)
-    char *strMir;
+    char *strMir, *strRX;
     if (strcmp(path, "/")) // pointer menunjuk pada folder
     {
         strMir = strstr(path, "/AtoZ_");
@@ -70,6 +95,12 @@ char *find_path(const char *path)
             toMirror = 1;
             strMir++;
         }
+        strRX = strstr(path, "/RX_");
+        if (strRX)
+        {
+            toROT = 1;
+            strRX++;
+        }
     }
 
     if (strcmp(path, "/") == 0)
@@ -77,14 +108,21 @@ char *find_path(const char *path)
         sprintf(fpath, "%s", dirpath);
         // path masih di folder Downloads
     }
-    else if (toMirror)
+    else if (toMirror || toROT)
     {
         char pathOrigin[maxSize] = "";
-        strncpy(pathOrigin, path, strlen(path) - strlen(strMir));
-        // isinya folder AtoZ_ pertama
-
         char t[maxSize];
-        strcpy(t, strMir);
+        if (toMirror)
+        {
+            strncpy(pathOrigin, path, strlen(path) - strlen(strMir));
+            strcpy(t, strMir);
+        }
+
+        else if (toROT)
+        {
+            strncpy(pathOrigin, path, strlen(path) - strlen(strRX));
+            strcpy(t, strRX);
+        }
 
         char *selectedFile;
         char *rest = t;
@@ -122,23 +160,35 @@ char *find_path(const char *path)
                     {
                         // Mengubah nama file jika memiliki extensi tanpa mengubah ext file tersebut
                         strncpy(fileName, selectedFile, strlen(selectedFile) - strlen(ext));
-                        sprintf(fileName, "%s%s", endecode(fileName), ext);
+                        if (toMirror)
+                            sprintf(fileName, "%s%s", AtoZ_code(fileName), ext);
+                        else if (toROT)
+                            sprintf(fileName, "%s%s", RX_code(fileName), ext);
                     }
                     else
                     {
-                        strcpy(fileName, endecode(selectedFile));
+                        if (toMirror)
+                            strcpy(fileName, AtoZ_code(selectedFile));
+                        else if (toROT)
+                            strcpy(fileName, RX_code(selectedFile));
                     }
                     printf("%s\n", fileName);
                     strcat(pathOrigin, fileName); // Semua nama file di lokasi sumber (asli)
                 }
                 else
                 {
-                    strcat(pathOrigin, endecode(selectedFile));
+                    if (toMirror)
+                        strcat(pathOrigin, AtoZ_code(selectedFile));
+                    else if (toROT)
+                        strcat(pathOrigin, RX_code(selectedFile));
                 }
             }
             else
             {
-                strcat(pathOrigin, endecode(selectedFile));
+                if (toMirror)
+                    strcat(pathOrigin, AtoZ_code(selectedFile));
+                else if (toROT)
+                    strcat(pathOrigin, RX_code(selectedFile));
             }
         }
         sprintf(fpath, "%s%s", dirpath, pathOrigin);
@@ -154,7 +204,7 @@ static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 {
     printf("\n===Directory '%s'===\n", path);
     char fpath[maxSize];
-    bool toMirror = strstr(path, "/AtoZ_");
+    bool toMirror = strstr(path, "/AtoZ_"), toROT = strstr(path, "/RX_");
 
     strcpy(fpath, find_path(path));
 
@@ -180,13 +230,18 @@ static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
         {
             res = (filler(buf, de->d_name, &st, 0));
         }
-        else if (toMirror)
+        else if (toMirror || toROT)
         {
             if (de->d_type & DT_DIR)
             {
                 char temp[maxSize];
                 strcpy(temp, de->d_name);
-                strcpy(temp, endecode(temp));
+
+                if (toMirror)
+                    strcpy(temp, AtoZ_code(temp));
+                else if (toROT)
+                    strcpy(temp, RX_code(temp));
+
                 res = (filler(buf, temp, &st, 0));
             }
             else
@@ -198,12 +253,20 @@ static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
                 if (ext)
                 {
                     strncpy(fileName, de->d_name, strlen(de->d_name) - strlen(ext));
-                    strcpy(fileName, endecode(fileName));
+
+                    if (toMirror)
+                        strcpy(fileName, AtoZ_code(fileName));
+                    else if (toROT)
+                        strcpy(fileName, RX_code(fileName));
+
                     strcat(fileName, ext);
                 }
                 else
                 {
-                    strcpy(fileName, endecode(de->d_name));
+                    if (toMirror)
+                        strcpy(fileName, AtoZ_code(de->d_name));
+                    else if (toROT)
+                        strcpy(fileName, RX_code(de->d_name));
                 }
                 res = (filler(buf, fileName, &st, 0));
             }
@@ -254,8 +317,8 @@ static int xmp_getattr(const char *path, struct stat *stbuf)
 
 static int xmp_rename(const char *src, const char *des)
 {
-    char *checkEndecode = strchr(des, '/');
-    if (strstr(checkEndecode, "/AtoZ_"))
+    char *filepath = strchr(des, '/');
+    if (strstr(filepath, "/AtoZ_") || strstr(filepath, "/RX_"))
     {
         char oldName[maxSize];
         char newName[maxSize];
@@ -284,8 +347,8 @@ static int xmp_rename(const char *src, const char *des)
 
 static int xmp_mkdir(const char *path, mode_t mode)
 {
-    char *checkEndecode = strchr(path, '/');
-    if (strstr(checkEndecode, "/AtoZ_"))
+    char *filepath = strchr(path, '/');
+    if (strstr(filepath, "/AtoZ_") || strstr(filepath, "/RX_"))
     {
         char temp[maxSize];
         sprintf(temp, "%s%s", dirpath, path);
