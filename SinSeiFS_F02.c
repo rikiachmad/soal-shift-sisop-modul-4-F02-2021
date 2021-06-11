@@ -33,6 +33,22 @@ char *AtoZ_code(char src[])
     char *res = str;
     return res;
 }
+
+void fsLog(char *level, char *cmd,int descLen, const char *desc[])
+{
+    FILE *f = fopen(FSLogPath, "a");
+    time_t now;
+	time ( &now );
+	struct tm * timeinfo = localtime (&now);
+	fprintf(f, "%s::%s::%02d%02d%04d-%02d:%02d:%02d",level,cmd,timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+    for(int i = 0; i<descLen; i++)
+    {
+        fprintf(f,"::%s",desc[i]);
+    }
+    fprintf(f,"\n");
+    fclose(f);
+}
+
 char *RX_code(char src[])
 {
     char str[maxSize];
