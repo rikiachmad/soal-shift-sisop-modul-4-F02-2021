@@ -13,6 +13,7 @@
 #define keyLen 5
 char dirpath[maxSize];
 char key[] = "SISOP";
+static const char *FSLogPath = "/home/../SinSeiFS.log";
 //melakukan encode/decode
 char *AtoZ_code(char src[])
 {
