@@ -18,6 +18,7 @@ char *AtoZ_code(char src[])
 {
     char str[maxSize];
     strcpy(str, src);
+	
     int i;
     for (i = 0; i < strlen(str); i++)
     {
