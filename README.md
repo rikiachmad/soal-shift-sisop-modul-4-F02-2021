@@ -375,3 +375,36 @@ char *Vigenere(char src[])
     return AtoZ_code(res);
 }
 ```
+
+File dengan nama 'AtoZ_'
+
+![image](https://user-images.githubusercontent.com/45300477/121805175-3442d580-cc74-11eb-9e53-b4a3a2223292.png)
+
+Setelah 'AtoZ_' dihilangkan
+
+![image](https://user-images.githubusercontent.com/45300477/121805209-63f1dd80-cc74-11eb-9ab3-6de41657e68d.png)
+
+Folder sumber (asli) dengan 'AtoZ_'
+
+![image](https://user-images.githubusercontent.com/45300477/121805236-90a5f500-cc74-11eb-91c2-c7bda51d99d6.png)
+
+Menguji sifat rekursif (folder di dalam filesistem)
+
+![image](https://user-images.githubusercontent.com/45300477/121805260-aca99680-cc74-11eb-9bb0-ca88fa9f8242.png)
+
+File di sumber asli
+
+![image](https://user-images.githubusercontent.com/45300477/121805292-cb0f9200-cc74-11eb-991c-c244750863f8.png)
+
+Berlaku juga untuk 'RX_'
+
+![image](https://user-images.githubusercontent.com/45300477/121805310-ef6b6e80-cc74-11eb-94cb-7bbb9c1f31c0.png)
+![image](https://user-images.githubusercontent.com/45300477/121805318-fdb98a80-cc74-11eb-85db-455d3a6eb072.png)
+
+Pada terminal akan tercetak informasi
+
+![image](https://user-images.githubusercontent.com/45300477/121805378-407b6280-cc75-11eb-9fea-cb1f0e85e013.png)
+
+File log
+
+![image](https://user-images.githubusercontent.com/45300477/121805406-5b4dd700-cc75-11eb-9e57-23f16f940b79.png)
